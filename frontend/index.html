@@ -241,6 +241,31 @@ a { color: var(--accent2); text-decoration: none; }
   font-size: 13px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
 }
 
+.creator-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+  padding: 20px; transition: border-color .2s, transform .2s;
+}
+.creator-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.creator-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.creator-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.creator-name { font-size: 16px; font-weight: 700; color: var(--text1); }
+.creator-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.creator-match { margin-left: auto; font-size: 22px; font-weight: 800; color: var(--accent); }
+.creator-why {
+  font-size: 13px; color: var(--text2); line-height: 1.6;
+  padding: 10px 12px; background: var(--bg3); border-radius: 8px; margin-bottom: 12px;
+}
+.creator-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.creator-tag {
+  font-size: 11px; padding: 3px 10px; border-radius: 20px;
+  background: rgba(139,92,246,0.15); color: var(--accent); font-weight: 600;
+}
+
 .btn-analyze {
   width: 100%; padding: 16px; margin-top: 20px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -529,6 +554,9 @@ a { color: var(--accent2); text-decoration: none; }
       </button>
       <button class="nav-item" id="nav-chat" onclick="goToView('chat-view', this)">
         <span class="nav-icon">💬</span> AI Chat
+      </button>
+      <button class="nav-item" id="nav-creators" onclick="goToView('creators-view', this)">
+        <span class="nav-icon">🌟</span> Creators
       </button>
     </div>
 
@@ -949,6 +977,70 @@ a { color: var(--accent2); text-decoration: none; }
             oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
           <button class="btn-send" onclick="sendChat()">➤</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ── Creators View ─────────────────────────────── -->
+    <div id="creators-view" class="view hidden">
+      <div class="section-header">
+        <h2>🌟 Creator Recommendations</h2>
+        <p style="color:var(--text2);font-size:14px;margin-top:4px;">Tell us what you play and enjoy — AI finds the perfect creators for you</p>
+      </div>
+
+      <div class="stats-form" style="max-width:640px;margin:0 auto 32px;">
+        <h3 style="margin-bottom:20px;">Your Preferences</h3>
+
+        <div class="form-field" style="margin-bottom:18px;">
+          <label style="display:block;margin-bottom:10px;font-weight:600;">Games You Play</label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 16px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);">
+              <input type="checkbox" id="cr-val" value="Valorant" style="width:16px;height:16px;accent-color:var(--red);"> Valorant
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 16px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);">
+              <input type="checkbox" id="cr-fifa" value="FIFA" style="width:16px;height:16px;accent-color:var(--green);"> FIFA
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 16px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);">
+              <input type="checkbox" id="cr-f1" value="F1" style="width:16px;height:16px;accent-color:var(--orange);"> F1
+            </label>
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-bottom:18px;">
+          <label style="display:block;margin-bottom:8px;font-weight:600;">Content Style You Enjoy</label>
+          <select id="cr-style" style="width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text1);font-size:14px;">
+            <option value="educational and analytical">Educational & Analytical</option>
+            <option value="funny and entertainment">Funny & Entertainment</option>
+            <option value="competitive and high-level gameplay">Competitive & High-Level</option>
+            <option value="tutorials and beginner friendly">Tutorials & Beginner Friendly</option>
+            <option value="short clips and highlights">Short Clips & Highlights</option>
+            <option value="meta analysis and patch notes">Meta & Patch Notes</option>
+            <option value="variety and casual gaming">Variety & Casual</option>
+          </select>
+        </div>
+
+        <div class="form-field" style="margin-bottom:24px;">
+          <label style="display:block;margin-bottom:8px;font-weight:600;">Your Goal</label>
+          <input type="text" id="cr-goal" placeholder="e.g. rank up in Valorant, build a better FUT team, improve lap times..."
+            style="width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text1);font-size:14px;box-sizing:border-box;" />
+        </div>
+
+        <div id="cr-error" style="display:none;color:#fca5a5;font-size:13px;margin-bottom:12px;"></div>
+
+        <button class="btn-primary" onclick="getCreatorRecs()" style="width:100%;">
+          🔍 Find My Creators
+        </button>
+      </div>
+
+      <!-- Results -->
+      <div id="creators-results" class="hidden">
+        <h3 style="margin-bottom:6px;">Recommended For You</h3>
+        <p id="cr-query-label" style="color:var(--text2);font-size:13px;margin-bottom:24px;"></p>
+        <div id="creator-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;"></div>
+      </div>
+
+      <div id="creators-loading" class="hidden" style="text-align:center;padding:60px 0;">
+        <div class="analyzing-spinner"></div>
+        <p style="color:var(--text2);margin-top:16px;">AI is finding your perfect creators...</p>
       </div>
     </div>
 
@@ -1575,6 +1667,71 @@ window.onload = () => {
     if (e.key === 'Enter') enterApp();
   });
 };
+
+// ─── Creator Recommendations ──────────────────────────────────────
+async function getCreatorRecs() {
+  const games = [];
+  if (document.getElementById('cr-val').checked) games.push('Valorant');
+  if (document.getElementById('cr-fifa').checked) games.push('FIFA');
+  if (document.getElementById('cr-f1').checked) games.push('F1');
+  const style = document.getElementById('cr-style').value;
+  const goal = document.getElementById('cr-goal').value.trim();
+  const errEl = document.getElementById('cr-error');
+
+  errEl.style.display = 'none';
+  if (games.length === 0) { errEl.textContent = '⚠ Select at least one game.'; errEl.style.display = 'block'; return; }
+  if (!goal) { errEl.textContent = '⚠ Please enter your goal.'; errEl.style.display = 'block'; return; }
+
+  document.getElementById('creators-results').classList.add('hidden');
+  document.getElementById('creators-loading').classList.remove('hidden');
+
+  try {
+    const res = await fetch(`${API}/api/creators/recommend`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ games, style, goal, n: 5 })
+    });
+    if (!res.ok) throw new Error('Server error');
+    const data = await res.json();
+    renderCreators(data);
+  } catch (e) {
+    errEl.textContent = '❌ Could not reach server. Is the backend running?';
+    errEl.style.display = 'block';
+  } finally {
+    document.getElementById('creators-loading').classList.add('hidden');
+  }
+}
+
+function renderCreators(data) {
+  document.getElementById('cr-query-label').textContent =
+    `Based on: ${data.games.join(', ')} · ${data.style} · Goal: "${data.goal}"`;
+
+  const emojis = ['🎮','🎯','🏆','⚡','🔥','🌟','💫','🎪','🎭','🚀'];
+  const container = document.getElementById('creator-cards');
+  container.innerHTML = '';
+
+  data.creators.forEach((c, i) => {
+    const tags = c.games.split(',').map(g => `<span class="creator-tag">${g.trim()}</span>`).join('');
+    const styleTag = `<span class="creator-tag">${c.category}</span>`;
+    const platformTag = `<span class="creator-tag" style="background:rgba(16,185,129,0.15);color:var(--green);">${c.platform}</span>`;
+
+    container.innerHTML += `
+      <div class="creator-card">
+        <div class="creator-card-header">
+          <div class="creator-avatar">${emojis[i % emojis.length]}</div>
+          <div>
+            <div class="creator-name">${c.name}</div>
+            <div class="creator-meta">${c.platform}</div>
+          </div>
+          <div class="creator-match">${c.match_score}%</div>
+        </div>
+        <div class="creator-why">💡 ${c.why}</div>
+        <div class="creator-tags">${tags}${styleTag}${platformTag}</div>
+      </div>`;
+  });
+
+  document.getElementById('creators-results').classList.remove('hidden');
+}
 </script>
 </body>
 </html>

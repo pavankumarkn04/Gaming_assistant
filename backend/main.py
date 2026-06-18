@@ -12,6 +12,7 @@ from rag import ingest_all_data, search_knowledge, get_document_count
 from agent import chat_with_agent
 from database import init_db, get_db, PlayerSession
 from analyzer import analyze_gameplay, extract_stats_from_image, get_grade
+from recommender import recommend_creators, ingest_creators
 from sqlalchemy.orm import Session
 
 app = FastAPI(title="PAV1 AI Gaming Assistant", version="2.0.0")
@@ -65,7 +66,8 @@ async def startup():
     init_db()
     print("Indexing game knowledge base...")
     count = ingest_all_data()
-    print(f"Ready. {count} documents indexed.")
+    creators = ingest_creators()
+    print(f"Ready. {count} game docs + {creators} creators indexed.")
 
 
 # ── Static ──────────────────────────────────────────────────────────────────
@@ -253,6 +255,34 @@ async def reingest():
     count = ingest_all_data()
     stats = get_document_count()
     return {"message": "Re-indexed successfully", "total": count, "by_game": stats["by_game"]}
+
+
+# ── Creator Recommendations ──────────────────────────────────────────────────
+
+class RecommendRequest(BaseModel):
+    games: list[str]
+    style: str
+    goal: str
+    n: Optional[int] = 5
+
+@app.post("/api/creators/recommend")
+async def creator_recommend(req: RecommendRequest):
+    if not req.games:
+        raise HTTPException(status_code=400, detail="Select at least one game")
+    if not req.style.strip() or not req.goal.strip():
+        raise HTTPException(status_code=400, detail="Style and goal are required")
+    result = recommend_creators(
+        games=req.games,
+        content_style=req.style.strip(),
+        goal=req.goal.strip(),
+        n=req.n
+    )
+    return result
+
+@app.get("/api/creators/all")
+async def all_creators():
+    from data.creators_data import CREATORS_DATA
+    return {"creators": CREATORS_DATA, "total": len(CREATORS_DATA)}
 
 
 if __name__ == "__main__":

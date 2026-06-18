@@ -1,0 +1,167 @@
+CREATORS_DATA = [
+    {
+        "id": "cr_001",
+        "name": "ValorantViperX",
+        "platform": "YouTube + Twitch",
+        "category": "Competitive Educator",
+        "games": ["Valorant"],
+        "style": "Educational, analytical, calm",
+        "description": "ValorantViperX is a Radiant-ranked Valorant player who creates detailed agent guides, map callout videos, and ranked improvement content. Known for breaking down pro strategies into beginner-friendly tips. Best for players who want to climb ranks through smart play rather than mechanical aim.",
+        "content_tags": "valorant agent guide rank climb radiant tips strategy map callouts educational competitive ranked improvement",
+        "audience": "Competitive Valorant players, rank grinders, strategy learners"
+    },
+    {
+        "id": "cr_002",
+        "name": "FragKingTV",
+        "platform": "Twitch + YouTube",
+        "category": "Entertainment Streamer",
+        "games": ["Valorant", "CS2"],
+        "style": "Funny, hype, entertainment, highlights",
+        "description": "FragKingTV is a high-energy FPS streamer known for insane clutch plays, funny rage moments, and entertaining commentary. Creates highlight reels and montages. Perfect for viewers who want exciting gameplay entertainment rather than tutorials. Has a large community with meme culture.",
+        "content_tags": "valorant funny highlights entertainment clutch rage moments montage hype fps streamer",
+        "audience": "Casual viewers, entertainment seekers, FPS fans"
+    },
+    {
+        "id": "cr_003",
+        "name": "AimLabPro",
+        "platform": "YouTube",
+        "category": "Aim Training Specialist",
+        "games": ["Valorant", "CS2", "Apex Legends"],
+        "style": "Technical, precise, data-driven",
+        "description": "AimLabPro creates science-backed aim training routines, crosshair placement guides, and sensitivity optimization videos. Uses data and heatmaps to teach mechanical skill improvement. Covers mouse settings, monitor setup, and daily warmup routines used by pro players.",
+        "content_tags": "aim training crosshair placement sensitivity mouse settings warmup routine mechanical skill fps improvement technical",
+        "audience": "Players wanting to improve mechanical aim, FPS beginners and intermediates"
+    },
+    {
+        "id": "cr_004",
+        "name": "ProValoCoach",
+        "platform": "YouTube + Discord",
+        "category": "Pro Coach",
+        "games": ["Valorant"],
+        "style": "Coaching, VOD review, structured learning",
+        "description": "ProValoCoach is a former professional Valorant player turned content creator. Creates VOD reviews, team coordination guides, and IGL (in-game leader) strategy content. Runs a coaching Discord with drills and weekly challenges. Best for serious players wanting structured improvement.",
+        "content_tags": "valorant coaching vod review IGL in-game leader team coordination pro player structured improvement ranked",
+        "audience": "Serious Valorant players, aspiring pros, team players"
+    },
+    {
+        "id": "cr_005",
+        "name": "FIFAGodFUT",
+        "platform": "YouTube + Twitch",
+        "category": "FUT Expert",
+        "games": ["FIFA", "EA FC"],
+        "style": "Trading tips, squad building, meta analysis",
+        "description": "FIFAGodFUT is the go-to creator for FIFA Ultimate Team content. Covers coin trading methods, SBC solutions, meta squad builds, and player investment tips. Posts daily market analysis and best budget squads. Perfect for FUT players who want to build strong teams without spending real money.",
+        "content_tags": "FIFA FUT ultimate team trading coins squad builder SBC meta budget team investment market analysis",
+        "audience": "FUT players, budget squad builders, FIFA traders"
+    },
+    {
+        "id": "cr_006",
+        "name": "SkillMovesKing",
+        "platform": "YouTube + TikTok",
+        "category": "Skill Tutorial Creator",
+        "games": ["FIFA", "EA FC"],
+        "style": "Tutorial, skill moves, trick shots",
+        "description": "SkillMovesKing specializes in FIFA skill move tutorials, trickshots, and dribbling techniques. Creates step-by-step guides for 5-star skill moves, elastico combos, and attacking patterns. Also covers set piece routines and penalty techniques. Great for players wanting to improve their attacking flair.",
+        "content_tags": "FIFA skill moves tutorial elastico dribbling 5 star tricks attacking set pieces penalties trickshot",
+        "audience": "FIFA players wanting to learn tricks, offensive players, skill enthusiasts"
+    },
+    {
+        "id": "cr_007",
+        "name": "CareerModeStories",
+        "platform": "YouTube",
+        "category": "Career Mode Creator",
+        "games": ["FIFA", "EA FC"],
+        "style": "Storytelling, roleplay, long-form content",
+        "description": "CareerModeStories creates immersive FIFA Career Mode series where they manage lower league clubs to Champions League glory. Known for realistic transfers, youth academy development, and narrative-driven gameplay. Creates long-form episodic content with custom rules and challenges.",
+        "content_tags": "FIFA career mode manager story lower league youth academy transfer realistic long form episodic challenge",
+        "audience": "Career mode fans, story gamers, single-player FIFA players"
+    },
+    {
+        "id": "cr_008",
+        "name": "F1SetupMaster",
+        "platform": "YouTube",
+        "category": "F1 Technical Expert",
+        "games": ["F1 24", "F1 25"],
+        "style": "Technical, detailed, setup guides",
+        "description": "F1SetupMaster creates the most detailed F1 game car setup guides on YouTube. Covers every circuit with optimized setups for time trial and career mode. Explains aerodynamics, suspension, and tyre management in simple terms. Also creates hotlap tutorials showing racing lines for each track.",
+        "content_tags": "F1 car setup circuit guide aerodynamics suspension tyre management hotlap racing line time trial career technical",
+        "audience": "F1 game players wanting faster lap times, setup learners, competitive time trial players"
+    },
+    {
+        "id": "cr_009",
+        "name": "RaceLineRaja",
+        "platform": "Twitch + YouTube",
+        "category": "F1 Entertainer",
+        "games": ["F1 24", "F1 25"],
+        "style": "Entertainment, online racing, funny moments",
+        "description": "RaceLineRaja streams F1 online multiplayer races with hilarious commentary. Known for dramatic overtakes, chaotic first-lap incidents, and entertaining rivalries with other streamers. Creates funny F1 moments compilations and hosts online community race events.",
+        "content_tags": "F1 online multiplayer funny moments race highlights first lap chaos entertainment community events streamer",
+        "audience": "F1 entertainment viewers, casual F1 fans, online multiplayer players"
+    },
+    {
+        "id": "cr_010",
+        "name": "F1StrategyGuru",
+        "platform": "YouTube",
+        "category": "F1 Strategy Analyst",
+        "games": ["F1 24", "F1 25"],
+        "style": "Analytical, strategy, race engineering",
+        "description": "F1StrategyGuru breaks down real F1 race strategies and applies them to the F1 game. Creates undercut vs overcut guides, tyre compound tutorials, and safety car strategy content. Also covers DRS zones, fuel management, and engine mode optimization for maximum race pace.",
+        "content_tags": "F1 strategy undercut overcut tyre compound safety car DRS fuel management race engineering analytical",
+        "audience": "F1 strategy enthusiasts, race engineers at heart, competitive F1 players"
+    },
+    {
+        "id": "cr_011",
+        "name": "GamingWithGaurav",
+        "platform": "YouTube + Instagram",
+        "category": "Variety Gaming Creator",
+        "games": ["Valorant", "FIFA", "F1", "BGMI", "GTA V"],
+        "style": "Variety, fun, Indian gaming community",
+        "description": "GamingWithGaurav is a popular Indian variety gaming creator covering Valorant, FIFA, F1, and BGMI. Creates funny gaming moments, squad games, and Hindi commentary content. Runs community tournaments and gaming challenges. Represents the growing Indian gaming creator ecosystem.",
+        "content_tags": "variety gaming Indian Hindi commentary Valorant FIFA F1 BGMI squad games community tournament fun",
+        "audience": "Indian gamers, Hindi-speaking audience, variety gaming fans"
+    },
+    {
+        "id": "cr_012",
+        "name": "EsportsAnalystPro",
+        "platform": "YouTube + Twitter",
+        "category": "Esports Analyst",
+        "games": ["Valorant", "CS2", "FIFA"],
+        "style": "Analysis, deep dives, professional esports",
+        "description": "EsportsAnalystPro creates deep-dive analysis of professional esports matches, meta shifts, and roster moves. Breaks down team compositions, tournament strategies, and patch impacts on the pro scene. Essential for fans who want to understand the professional side of gaming beyond casual play.",
+        "content_tags": "esports analysis pro scene tournament roster meta patch Valorant CS2 professional team composition strategy",
+        "audience": "Esports fans, aspiring pros, competitive gaming enthusiasts"
+    },
+    {
+        "id": "cr_013",
+        "name": "BudgetGamerIndia",
+        "platform": "YouTube + Shorts",
+        "category": "Budget Gaming Creator",
+        "games": ["Valorant", "FIFA", "F1", "BGMI"],
+        "style": "Budget tips, accessibility, beginner-friendly",
+        "description": "BudgetGamerIndia helps Indian gamers get the most out of free-to-play and budget gaming. Creates PC build guides under 30k, free gaming setup tips, and how to compete without spending money. Covers free agents in Valorant, budget FUT teams in FIFA, and free game recommendations.",
+        "content_tags": "budget gaming India free to play PC build affordable setup beginner guide no money Valorant FIFA",
+        "audience": "Budget-conscious gamers, beginners, Indian gaming community"
+    },
+    {
+        "id": "cr_014",
+        "name": "ClipFactoryGaming",
+        "platform": "YouTube Shorts + TikTok + Instagram",
+        "category": "Short Form Creator",
+        "games": ["Valorant", "FIFA", "F1"],
+        "style": "Short clips, highlights, viral moments",
+        "description": "ClipFactoryGaming curates and creates the best short-form gaming content across Valorant, FIFA, and F1. Posts daily highlights, insane plays, and viral gaming moments in under 60 seconds. Perfect for discovering top plays without long videos. Trending moments from all major gaming titles.",
+        "content_tags": "short clips highlights viral moments gaming shorts reels daily posts trending Valorant FIFA F1 quick",
+        "audience": "Mobile viewers, short attention span content lovers, gaming highlights fans"
+    },
+    {
+        "id": "cr_015",
+        "name": "MetaWatchGaming",
+        "platform": "YouTube + Discord",
+        "category": "Meta Analyst",
+        "games": ["Valorant", "FIFA"],
+        "style": "Patch notes, meta analysis, tier lists",
+        "description": "MetaWatchGaming is the first to break down every patch note in Valorant and FIFA. Creates tier lists after every update, weapon meta analysis, and agent/player card rankings. Runs a Discord where competitive players discuss the current meta. Essential for staying competitive after every update.",
+        "content_tags": "patch notes meta analysis tier list weapon ranking agent ranking update breakdown Valorant FIFA competitive",
+        "audience": "Competitive players, patch note followers, meta chasers"
+    },
+]
