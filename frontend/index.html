@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAV1 AI — Gaming Assistant</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #07070f;
+  --bg2: #0f0f1c;
+  --bg3: #161625;
+  --border: #252538;
+  --text: #e8e8f2;
+  --muted: #6b6b90;
+  --accent: #7c3aed;
+  --accent2: #9d5cf5;
+  --val: #ff4655;
+  --fifa: #00c853;
+  --f1: #ff5722;
+  --green: #10b981;
+  --yellow: #f59e0b;
+  --red: #ef4444;
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; }
+.hidden { display: none !important; }
+a { color: var(--accent2); text-decoration: none; }
+
+/* ── AUTH ─────────────────────────────────────────────────── */
+#auth-view {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 30% 50%, #1a0a2e 0%, var(--bg) 70%);
+}
+.auth-card {
+  width: 420px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+}
+.auth-logo { text-align: center; margin-bottom: 32px; }
+.auth-logo .logo-badge {
+  width: 60px; height: 60px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 28px; margin-bottom: 12px;
+}
+.auth-logo h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.auth-logo p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input {
+  width: 100%; padding: 14px 16px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-size: 15px;
+  outline: none; transition: border-color .2s;
+}
+.form-group input:focus { border-color: var(--accent); }
+.btn-primary {
+  width: 100%; padding: 15px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none; border-radius: 10px; color: white;
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  transition: opacity .2s, transform .1s;
+}
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.auth-footer { text-align: center; margin-top: 16px; font-size: 13px; color: var(--muted); }
+.auth-features { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+.feature-chip {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 20px; padding: 6px 12px; font-size: 12px; color: var(--muted);
+}
+
+/* ── APP LAYOUT ───────────────────────────────────────────── */
+#app { display: flex; height: 100vh; }
+
+#sidebar {
+  width: 240px; min-width: 240px;
+  background: var(--bg2); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 20px 0;
+  overflow-y: auto;
+}
+.sidebar-logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.sidebar-logo .logo-row { display: flex; align-items: center; gap: 10px; }
+.sidebar-logo .logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.sidebar-logo .logo-text { font-weight: 800; font-size: 17px; letter-spacing: -0.3px; }
+.sidebar-logo .logo-sub { font-size: 11px; color: var(--muted); }
+
+.sidebar-user {
+  padding: 12px 20px; margin: 0 12px 16px;
+  background: var(--bg3); border-radius: 10px; border: 1px solid var(--border);
+}
+.sidebar-user .user-name { font-weight: 700; font-size: 14px; }
+.sidebar-user .user-tag { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.nav-section { padding: 0 12px; margin-bottom: 8px; }
+.nav-section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 600; padding: 0 8px; margin-bottom: 6px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 8px;
+  cursor: pointer; font-size: 14px; font-weight: 500;
+  transition: background .15s, color .15s; color: var(--muted);
+  border: none; background: none; width: 100%; text-align: left;
+}
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active { background: rgba(124,58,237,0.15); color: var(--accent2); }
+.nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); }
+.btn-logout {
+  width: 100%; padding: 10px; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--muted); font-size: 13px; cursor: pointer;
+  transition: all .2s;
+}
+.btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+#main-content {
+  flex: 1; overflow-y: auto; padding: 32px;
+  background: var(--bg);
+}
+.view { display: block; }
+
+/* ── GAME SELECT ──────────────────────────────────────────── */
+.page-header { margin-bottom: 28px; }
+.page-header h2 { font-size: 26px; font-weight: 800; }
+.page-header p { color: var(--muted); margin-top: 6px; font-size: 15px; }
+
+.game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.game-card {
+  background: var(--bg2); border: 2px solid var(--border);
+  border-radius: 18px; padding: 28px; cursor: pointer;
+  transition: all .25s; position: relative; overflow: hidden;
+}
+.game-card::before {
+  content: ''; position: absolute; inset: 0;
+  opacity: 0; transition: opacity .25s;
+  pointer-events: none;
+}
+.game-card.val::before { background: radial-gradient(ellipse at top, rgba(255,70,85,0.12), transparent 70%); }
+.game-card.fifa::before { background: radial-gradient(ellipse at top, rgba(0,200,83,0.12), transparent 70%); }
+.game-card.f1::before { background: radial-gradient(ellipse at top, rgba(255,87,34,0.12), transparent 70%); }
+.game-card:hover { transform: translateY(-4px); }
+.game-card:hover::before { opacity: 1; }
+.game-card.val:hover { border-color: var(--val); }
+.game-card.fifa:hover { border-color: var(--fifa); }
+.game-card.f1:hover { border-color: var(--f1); }
+
+.game-icon { font-size: 42px; margin-bottom: 16px; }
+.game-name { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+.game-desc { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+.game-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.tag {
+  font-size: 11px; padding: 4px 10px; border-radius: 20px;
+  background: var(--bg3); color: var(--muted); border: 1px solid var(--border);
+}
+.game-actions { display: flex; flex-direction: column; gap: 8px; }
+.btn-game-analyze {
+  padding: 12px; border-radius: 10px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; transition: all .2s;
+  color: white;
+}
+.val .btn-game-analyze { background: var(--val); }
+.fifa .btn-game-analyze { background: var(--fifa); }
+.f1 .btn-game-analyze { background: var(--f1); }
+.btn-game-analyze:hover { opacity: 0.85; transform: translateY(-1px); }
+.btn-game-chat {
+  padding: 11px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--bg3);
+  color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: all .2s;
+}
+.btn-game-chat:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* ── UPLOAD ───────────────────────────────────────────────── */
+.upload-container { max-width: 680px; }
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--muted); font-size: 14px; cursor: pointer;
+  background: none; border: none; padding: 0; margin-bottom: 24px;
+  transition: color .2s;
+}
+.back-btn:hover { color: var(--text); }
+
+.drop-zone {
+  border: 2px dashed var(--border); border-radius: 16px;
+  padding: 48px 32px; text-align: center; cursor: pointer;
+  transition: all .2s; background: var(--bg2); margin-bottom: 24px;
+  position: relative;
+}
+.drop-zone.drag-over { border-color: var(--accent); background: rgba(124,58,237,0.06); }
+.drop-zone .drop-icon { font-size: 44px; margin-bottom: 14px; }
+.drop-zone h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.drop-zone p { color: var(--muted); font-size: 14px; }
+.drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.image-preview {
+  width: 100%; max-height: 220px; object-fit: contain;
+  border-radius: 10px; margin-top: 16px; display: none;
+}
+
+.divider { display: flex; align-items: center; gap: 16px; margin: 24px 0; color: var(--muted); font-size: 13px; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.stats-form { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+.stats-form h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.form-field select, .form-field input[type="number"] {
+  width: 100%; padding: 11px 14px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-size: 14px; outline: none;
+  transition: border-color .2s;
+}
+.form-field select:focus, .form-field input[type="number"]:focus { border-color: var(--accent); }
+.form-field select option { background: var(--bg3); }
+.slider-field { grid-column: span 2; }
+.slider-row { display: flex; align-items: center; gap: 12px; }
+.slider-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+.slider-val { min-width: 48px; text-align: right; font-weight: 700; font-size: 15px; color: var(--accent2); }
+
+.form-field input.invalid,
+.form-field select.invalid {
+  border-color: var(--red) !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.15);
+}
+.field-error {
+  font-size: 12px; color: #fca5a5;
+  margin-top: 6px; display: flex; align-items: center; gap: 5px;
+}
+.form-error-banner {
+  background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+  color: #fca5a5; border-radius: 10px; padding: 12px 16px;
+  font-size: 13px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+
+.btn-analyze {
+  width: 100%; padding: 16px; margin-top: 20px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none; border-radius: 10px; color: white;
+  font-size: 16px; font-weight: 800; cursor: pointer;
+  transition: opacity .2s, transform .1s; letter-spacing: 0.3px;
+}
+.btn-analyze:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── ANALYZING ────────────────────────────────────────────── */
+#analyzing-view {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 60vh; text-align: center;
+}
+.analyzing-icon { font-size: 64px; margin-bottom: 24px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+.analyzing-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+.analyzing-sub { color: var(--muted); font-size: 15px; margin-bottom: 36px; }
+.steps { display: flex; flex-direction: column; gap: 12px; width: 340px; }
+.step {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: 10px;
+  background: var(--bg2); border: 1px solid var(--border);
+  font-size: 14px; color: var(--muted); transition: all .4s;
+}
+.step.active { border-color: var(--accent); color: var(--text); background: rgba(124,58,237,0.1); }
+.step.done { border-color: var(--green); color: var(--green); }
+.step-icon { font-size: 18px; width: 24px; text-align: center; }
+
+/* ── RESULTS ─────────────────────────────────────────────── */
+.results-header {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 28px; flex-wrap: wrap;
+}
+.results-header h2 { font-size: 22px; font-weight: 800; flex: 1; }
+.game-badge {
+  padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.game-badge.valorant { background: rgba(255,70,85,0.15); color: var(--val); border: 1px solid rgba(255,70,85,0.3); }
+.game-badge.fifa { background: rgba(0,200,83,0.12); color: var(--fifa); border: 1px solid rgba(0,200,83,0.3); }
+.game-badge.f1 { background: rgba(255,87,34,0.12); color: var(--f1); border: 1px solid rgba(255,87,34,0.3); }
+
+.score-card {
+  display: flex; align-items: center; gap: 32px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 18px; padding: 28px 32px; margin-bottom: 20px;
+}
+.score-gauge { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+.score-gauge svg { transform: rotate(-90deg); }
+.score-center {
+  position: absolute; inset: 0; display: flex;
+  flex-direction: column; align-items: center; justify-content: center;
+}
+.score-num { font-size: 30px; font-weight: 900; line-height: 1; }
+.score-denom { font-size: 12px; color: var(--muted); }
+.score-info { flex: 1; }
+.grade-badge {
+  display: inline-block; width: 52px; height: 52px; border-radius: 14px;
+  font-size: 26px; font-weight: 900; line-height: 52px; text-align: center;
+  margin-bottom: 10px;
+}
+.grade-S { background: rgba(139,92,246,0.2); color: #a78bfa; }
+.grade-A { background: rgba(16,185,129,0.2); color: var(--green); }
+.grade-B { background: rgba(59,130,246,0.2); color: #60a5fa; }
+.grade-C { background: rgba(245,158,11,0.2); color: var(--yellow); }
+.grade-D, .grade-F { background: rgba(239,68,68,0.2); color: var(--red); }
+.score-label { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.score-meta { font-size: 13px; color: var(--muted); }
+.score-actions { display: flex; flex-direction: column; gap: 10px; }
+.btn-secondary {
+  padding: 10px 20px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg3);
+  color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer;
+  white-space: nowrap; transition: all .2s;
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent2); }
+
+.results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 22px;
+}
+.card h3 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 14px; }
+.card-full { grid-column: span 2; }
+
+.list-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; line-height: 1.5;
+}
+.list-item:last-child { border: none; padding-bottom: 0; }
+.list-item .bullet { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+.priority-badge {
+  font-size: 10px; font-weight: 800; padding: 3px 8px;
+  border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0;
+}
+.priority-high { background: rgba(239,68,68,0.15); color: var(--red); }
+.priority-medium { background: rgba(245,158,11,0.15); color: var(--yellow); }
+.priority-low { background: rgba(16,185,129,0.15); color: var(--green); }
+
+.weapon-card, .teammate-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px; margin-bottom: 10px;
+}
+.weapon-card:last-child, .teammate-card:last-child { margin-bottom: 0; }
+.weapon-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.weapon-reason { font-size: 13px; color: var(--muted); line-height: 1.4; }
+
+.role-badge {
+  display: inline-block; padding: 6px 14px; border-radius: 20px;
+  background: rgba(124,58,237,0.15); color: var(--accent2);
+  border: 1px solid rgba(124,58,237,0.3); font-size: 13px; font-weight: 700;
+  margin-bottom: 12px;
+}
+.role-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.role-pill {
+  padding: 4px 10px; border-radius: 6px;
+  background: var(--bg); border: 1px solid var(--border);
+  font-size: 12px; color: var(--text);
+}
+
+/* ── HISTORY ─────────────────────────────────────────────── */
+.progress-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 16px; text-align: center;
+}
+.stat-box .stat-val { font-size: 28px; font-weight: 900; color: var(--accent2); }
+.stat-box .stat-lbl { font-size: 12px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.chart-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 22px; margin-bottom: 24px;
+}
+.chart-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 18px; }
+
+.session-list { display: flex; flex-direction: column; gap: 12px; }
+.session-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 20px;
+  display: flex; align-items: center; gap: 16px; cursor: pointer;
+  transition: border-color .2s, transform .15s;
+}
+.session-card:hover { border-color: var(--accent); transform: translateX(2px); }
+.session-score {
+  width: 50px; height: 50px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900; flex-shrink: 0;
+  background: var(--bg3);
+}
+.session-info { flex: 1; }
+.session-game { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+.session-summary { font-size: 13px; color: var(--muted); line-height: 1.4; }
+.session-date { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+
+/* ── CHAT ─────────────────────────────────────────────────── */
+#chat-view { display: flex; flex-direction: column; height: calc(100vh - 64px); }
+.chat-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-shrink: 0; }
+.chat-header h2 { font-size: 20px; font-weight: 800; flex: 1; }
+.game-pills { display: flex; gap: 8px; }
+.game-pill {
+  padding: 7px 14px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--bg2);
+  color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all .2s;
+}
+.game-pill.active { background: var(--accent); border-color: var(--accent); color: white; }
+.game-pill.val.active { background: var(--val); border-color: var(--val); }
+.game-pill.fifa-p.active { background: var(--fifa); border-color: var(--fifa); }
+.game-pill.f1p.active { background: var(--f1); border-color: var(--f1); }
+
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 8px 0; display: flex;
+  flex-direction: column; gap: 16px; min-height: 0;
+}
+.msg { display: flex; gap: 10px; max-width: 80%; }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-bubble {
+  padding: 13px 16px; border-radius: 14px; font-size: 14px; line-height: 1.6;
+}
+.msg.assistant .msg-bubble { background: var(--bg2); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.msg.user .msg-bubble { background: var(--accent); border-bottom-right-radius: 4px; }
+.msg-avatar {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0; align-self: flex-end;
+  background: var(--bg3); border: 1px solid var(--border);
+}
+.tool-badge {
+  display: inline-block; font-size: 11px; padding: 3px 8px;
+  background: rgba(124,58,237,0.15); color: var(--accent2);
+  border-radius: 4px; margin-right: 4px; font-weight: 600;
+}
+.typing-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: bounce .8s infinite; }
+.typing-dot:nth-child(2) { animation-delay: .15s; }
+.typing-dot:nth-child(3) { animation-delay: .3s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+
+.chat-input-area { flex-shrink: 0; padding-top: 16px; border-top: 1px solid var(--border); margin-top: 8px; }
+.chat-input-row { display: flex; gap: 10px; }
+.chat-input-row textarea {
+  flex: 1; padding: 13px 16px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; color: var(--text); font-size: 14px;
+  resize: none; outline: none; font-family: inherit;
+  transition: border-color .2s; max-height: 120px;
+}
+.chat-input-row textarea:focus { border-color: var(--accent); }
+.btn-send {
+  width: 50px; height: 50px; border-radius: 12px;
+  background: var(--accent); border: none; color: white;
+  font-size: 20px; cursor: pointer; flex-shrink: 0;
+  transition: opacity .2s;
+}
+.btn-send:hover { opacity: 0.85; }
+.chat-quick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.quick-btn {
+  padding: 7px 13px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg2);
+  color: var(--muted); font-size: 12px; cursor: pointer;
+  transition: all .2s;
+}
+.quick-btn:hover { border-color: var(--accent); color: var(--text); }
+
+/* ── EMPTY STATE ──────────────────────────────────────────── */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.empty-state p { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH VIEW ══════════════════════════════════════════════════════ -->
+<div id="auth-view">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-badge">🎮</div>
+      <h1>PAV1 AI</h1>
+      <p>Your Elite Gaming Coach</p>
+    </div>
+    <div class="auth-features">
+      <span class="feature-chip">🎯 Valorant</span>
+      <span class="feature-chip">⚽ FIFA</span>
+      <span class="feature-chip">🏎️ F1</span>
+      <span class="feature-chip">🤖 AI Coach</span>
+      <span class="feature-chip">📊 Progress Tracking</span>
+    </div>
+    <div class="form-group">
+      <label>Your Gaming Tag</label>
+      <input id="username-input" type="text" placeholder="e.g. ProGamer123" maxlength="30" />
+    </div>
+    <button class="btn-primary" onclick="enterApp()">Enter as Player →</button>
+    <div class="auth-footer">No account needed — just your gaming tag</div>
+  </div>
+</div>
+
+<!-- ══ APP ════════════════════════════════════════════════════════════ -->
+<div id="app" class="hidden">
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row">
+        <div class="logo-icon">🎮</div>
+        <div>
+          <div class="logo-text">PAV1 AI</div>
+          <div class="logo-sub">Gaming Assistant</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-name" id="sidebar-username">Player</div>
+      <div class="user-tag">Gaming Tag</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Play</div>
+      <button class="nav-item active" id="nav-games" onclick="goToView('game-select-view', this)">
+        <span class="nav-icon">🎮</span> Choose Game
+      </button>
+      <button class="nav-item" id="nav-history" onclick="loadAndShowHistory()">
+        <span class="nav-icon">📊</span> My Progress
+      </button>
+      <button class="nav-item" id="nav-chat" onclick="goToView('chat-view', this)">
+        <span class="nav-icon">💬</span> AI Chat
+      </button>
+    </div>
+
+    <div class="sidebar-bottom">
+      <button class="btn-logout" onclick="logout()">← Change Player</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main id="main-content">
+
+    <!-- ── Game Select ────────────────────────────── -->
+    <div id="game-select-view" class="view">
+      <div class="page-header">
+        <h2 id="welcome-msg">Welcome back! 👋</h2>
+        <p>Choose a game to analyze your gameplay or chat with your AI coach.</p>
+      </div>
+      <div class="game-grid">
+        <div class="game-card val">
+          <div class="game-icon">🎯</div>
+          <div class="game-name">Valorant</div>
+          <div class="game-desc">Tactical FPS analysis — agents, weapons, economy, strategy & more.</div>
+          <div class="game-tags">
+            <span class="tag">Agents</span><span class="tag">Weapons</span>
+            <span class="tag">Maps</span><span class="tag">Economy</span>
+          </div>
+          <div class="game-actions">
+            <button class="btn-game-analyze" onclick="selectGameAndAnalyze('valorant')">📸 Analyze My Gameplay</button>
+            <button class="btn-game-chat" onclick="selectGameAndChat('valorant')">💬 Chat with AI Coach</button>
+          </div>
+        </div>
+        <div class="game-card fifa">
+          <div class="game-icon">⚽</div>
+          <div class="game-name">FIFA</div>
+          <div class="game-desc">Football tactics analysis — formations, FUT chemistry, skill moves & players.</div>
+          <div class="game-tags">
+            <span class="tag">Formations</span><span class="tag">FUT</span>
+            <span class="tag">Players</span><span class="tag">Tactics</span>
+          </div>
+          <div class="game-actions">
+            <button class="btn-game-analyze" onclick="selectGameAndAnalyze('fifa')">📸 Analyze My Gameplay</button>
+            <button class="btn-game-chat" onclick="selectGameAndChat('fifa')">💬 Chat with AI Coach</button>
+          </div>
+        </div>
+        <div class="game-card f1">
+          <div class="game-icon">🏎️</div>
+          <div class="game-name">F1</div>
+          <div class="game-desc">Racing strategy analysis — setups, tyre strategy, circuits & driver comparisons.</div>
+          <div class="game-tags">
+            <span class="tag">Circuits</span><span class="tag">Tyres</span>
+            <span class="tag">Setups</span><span class="tag">Strategy</span>
+          </div>
+          <div class="game-actions">
+            <button class="btn-game-analyze" onclick="selectGameAndAnalyze('f1')">📸 Analyze My Gameplay</button>
+            <button class="btn-game-chat" onclick="selectGameAndChat('f1')">💬 Chat with AI Coach</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Upload View ────────────────────────────── -->
+    <div id="upload-view" class="view hidden">
+      <div class="upload-container">
+        <button class="back-btn" onclick="goToView('game-select-view', document.getElementById('nav-games'))">← Back to Games</button>
+        <div class="page-header">
+          <h2 id="upload-title">Analyze Your Gameplay</h2>
+          <p>Upload a screenshot of your results screen and PAV1 AI will break down your performance.</p>
+        </div>
+
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="drop-zone">
+          <div class="drop-icon">📸</div>
+          <h3>Drop your screenshot here</h3>
+          <p>PNG, JPG — scoreboard, end screen, or results</p>
+          <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)" />
+          <img id="image-preview" class="image-preview" alt="Preview" />
+        </div>
+        <button class="btn-analyze" id="btn-analyze-img" style="display:none" onclick="analyzeImage()">
+          🔍 Analyze Screenshot
+        </button>
+
+        <div class="divider">or enter stats manually</div>
+
+        <!-- Stats Forms -->
+        <div class="stats-form">
+          <h3 id="stats-form-title">Match Stats</h3>
+
+          <!-- Valorant Form -->
+          <div id="form-valorant">
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Agent</label>
+                <select id="v-agent">
+                  <option>Jett</option><option>Reyna</option><option>Phoenix</option>
+                  <option>Sage</option><option>Omen</option><option>Brimstone</option>
+                  <option>Killjoy</option><option>Cypher</option><option>Breach</option>
+                  <option>Sova</option><option>Fade</option><option>Chamber</option>
+                  <option>Neon</option><option>Yoru</option><option>Gekko</option>
+                  <option>Viper</option><option>Deadlock</option><option>Iso</option><option>Clove</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Map</label>
+                <select id="v-map">
+                  <option>Bind</option><option>Haven</option><option>Split</option>
+                  <option>Ascent</option><option>Icebox</option><option>Breeze</option>
+                  <option>Fracture</option><option>Pearl</option><option>Lotus</option>
+                  <option>Sunset</option><option>Abyss</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Kills</label>
+                <input type="number" id="v-kills" value="15" min="0" max="50" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field">
+                <label>Deaths</label>
+                <input type="number" id="v-deaths" value="10" min="0" max="50" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field">
+                <label>Assists</label>
+                <input type="number" id="v-assists" value="5" min="0" max="30" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field">
+                <label>First Bloods</label>
+                <input type="number" id="v-firstbloods" value="2" min="0" max="20" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field">
+                <label>Rounds Won</label>
+                <input type="number" id="v-rwon" value="13" min="0" max="25" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field">
+                <label>Rounds Lost</label>
+                <input type="number" id="v-rlost" value="8" min="0" max="25" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field slider-field">
+                <label>Headshot % — <span id="v-hs-val">28</span>%</label>
+                <div class="slider-row">
+                  <input type="range" id="v-hs" min="0" max="100" value="28" oninput="document.getElementById('v-hs-val').textContent=this.value" />
+                  <span class="slider-val" id="v-hs-val2">28%</span>
+                </div>
+              </div>
+              <div class="form-field slider-field">
+                <label>Economy Score — <span id="v-eco-val">65</span>/100</label>
+                <div class="slider-row">
+                  <input type="range" id="v-eco" min="0" max="100" value="65" oninput="document.getElementById('v-eco-val').textContent=this.value" />
+                  <span class="slider-val" id="v-eco-val2">65</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FIFA Form -->
+          <div id="form-fifa" class="hidden">
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Formation</label>
+                <select id="f-formation">
+                  <option>4-3-3</option><option>4-1-2-1-2 Narrow</option>
+                  <option>4-2-3-1</option><option>5-3-2</option>
+                  <option>3-5-2</option><option>4-4-2</option><option>4-3-2-1</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Match Result</label>
+                <select id="f-result">
+                  <option>Win</option><option>Draw</option><option>Loss</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Goals Scored</label>
+                <input type="number" id="f-goals" value="2" min="0" max="20" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field">
+                <label>Goals Conceded</label>
+                <input type="number" id="f-conceded" value="1" min="0" max="20" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field">
+                <label>Shots on Target</label>
+                <input type="number" id="f-shots" value="6" min="0" max="30" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field">
+                <label>Game Mode</label>
+                <select id="f-mode">
+                  <option>FUT</option><option>Career Mode</option><option>Online Seasons</option><option>Ultimate Team</option>
+                </select>
+              </div>
+              <div class="form-field slider-field">
+                <label>Pass Accuracy — <span id="f-pass-val">82</span>%</label>
+                <div class="slider-row">
+                  <input type="range" id="f-pass" min="0" max="100" value="82" oninput="document.getElementById('f-pass-val').textContent=this.value" />
+                  <span class="slider-val">%</span>
+                </div>
+              </div>
+              <div class="form-field slider-field">
+                <label>Possession — <span id="f-poss-val">54</span>%</label>
+                <div class="slider-row">
+                  <input type="range" id="f-poss" min="0" max="100" value="54" oninput="document.getElementById('f-poss-val').textContent=this.value" />
+                  <span class="slider-val">%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- F1 Form -->
+          <div id="form-f1" class="hidden">
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Team</label>
+                <select id="r-team">
+                  <option>Red Bull</option><option>McLaren</option><option>Ferrari</option>
+                  <option>Mercedes</option><option>Aston Martin</option><option>Alpine</option>
+                  <option>Williams</option><option>Racing Bulls</option><option>Kick Sauber</option><option>Haas</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Circuit</label>
+                <select id="r-circuit">
+                  <option>Monaco</option><option>Silverstone</option><option>Monza</option>
+                  <option>Spa</option><option>Suzuka</option><option>Bahrain</option>
+                  <option>Australia</option><option>Miami</option><option>Canada</option><option>Hungary</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Qualifying Position</label>
+                <input type="number" id="r-qual" value="5" min="1" max="20" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field">
+                <label>Finish Position</label>
+                <input type="number" id="r-finish" value="4" min="1" max="20" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field">
+                <label>Pit Stops</label>
+                <input type="number" id="r-pits" value="2" min="0" max="5" oninput="clearFieldError(this)" />
+              </div>
+              <div class="form-field">
+                <label>Tyre Strategy</label>
+                <select id="r-tyres">
+                  <option>Soft → Medium</option><option>Soft → Hard</option>
+                  <option>Medium → Hard</option><option>Soft → Medium → Hard</option>
+                  <option>Medium → Medium</option>
+                </select>
+              </div>
+              <div class="form-field slider-field">
+                <label>Clean Laps % — <span id="r-clean-val">88</span>%</label>
+                <div class="slider-row">
+                  <input type="range" id="r-clean" min="0" max="100" value="88" oninput="document.getElementById('r-clean-val').textContent=this.value" />
+                  <span class="slider-val">%</span>
+                </div>
+              </div>
+              <div class="form-field">
+                <label>Fastest Lap?</label>
+                <select id="r-fastest">
+                  <option value="false">No</option><option value="true">Yes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-analyze" onclick="analyzeStats()">🤖 Analyze My Stats</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Analyzing View ─────────────────────────── -->
+    <div id="analyzing-view" class="view hidden">
+      <div class="analyzing-icon">🤖</div>
+      <div class="analyzing-title">PAV1 AI is analyzing...</div>
+      <div class="analyzing-sub">Hang tight while your personal coach reviews your performance</div>
+      <div class="steps" id="analysis-steps">
+        <div class="step active" id="step-1"><span class="step-icon">🔍</span> Reading your data...</div>
+        <div class="step" id="step-2"><span class="step-icon">📊</span> Calculating performance score...</div>
+        <div class="step" id="step-3"><span class="step-icon">🧠</span> Running AI analysis...</div>
+        <div class="step" id="step-4"><span class="step-icon">🎯</span> Generating improvement plan...</div>
+        <div class="step" id="step-5"><span class="step-icon">✅</span> Finalizing your report...</div>
+      </div>
+    </div>
+
+    <!-- ── Results View ───────────────────────────── -->
+    <div id="results-view" class="view hidden">
+      <div class="results-header">
+        <button class="back-btn" style="margin:0" onclick="goToView('upload-view', null)">← New Analysis</button>
+        <span class="game-badge" id="res-game-badge">VALORANT</span>
+        <h2 id="res-title">Performance Report</h2>
+        <button class="btn-secondary" onclick="loadAndShowHistory()">View Progress →</button>
+      </div>
+
+      <!-- Stats source notice (shown when screenshot couldn't be parsed) -->
+      <div id="res-notice" class="hidden" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#fbbf24;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:16px;">
+        📸 Couldn't extract all stats from your screenshot — analysis used estimated defaults. For precise results, use the manual stats form.
+      </div>
+
+      <!-- Score Card -->
+      <div class="score-card">
+        <div class="score-gauge">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#252538" stroke-width="10"/>
+            <circle id="gauge-ring" cx="60" cy="60" r="50" fill="none" stroke="#10b981" stroke-width="10"
+              stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"/>
+          </svg>
+          <div class="score-center">
+            <div class="score-num" id="res-score">0</div>
+            <div class="score-denom">/100</div>
+          </div>
+        </div>
+        <div class="score-info">
+          <div class="grade-badge grade-B" id="res-grade">B</div>
+          <div class="score-label">Performance Score</div>
+          <div class="score-meta" id="res-date">Just now</div>
+        </div>
+        <div class="score-actions">
+          <button class="btn-secondary" onclick="goToView('upload-view', null)">Analyze Again</button>
+          <button class="btn-secondary" onclick="loadAndShowHistory()">My History</button>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="card" style="margin-bottom:16px">
+        <h3>📋 Summary</h3>
+        <p id="res-summary" style="font-size:15px;line-height:1.65;color:var(--text)"></p>
+      </div>
+
+      <!-- Strengths + Weaknesses -->
+      <div class="results-grid">
+        <div class="card">
+          <h3>✅ Strengths</h3>
+          <div id="res-strengths"></div>
+        </div>
+        <div class="card">
+          <h3>⚠️ Weaknesses</h3>
+          <div id="res-weaknesses"></div>
+        </div>
+
+        <!-- Improvements -->
+        <div class="card card-full">
+          <h3>🚀 Improvement Plan</h3>
+          <div id="res-improvements"></div>
+        </div>
+
+        <!-- Weapons -->
+        <div class="card">
+          <h3>🔫 Recommendations</h3>
+          <div id="res-weapons"></div>
+        </div>
+
+        <!-- Teammates -->
+        <div class="card">
+          <h3>🤝 Teammate Suggestions</h3>
+          <div id="res-teammates"></div>
+        </div>
+
+        <!-- Strategy -->
+        <div class="card card-full">
+          <h3>🗺️ Strategy</h3>
+          <p id="res-strategy" style="font-size:14px;line-height:1.7;color:var(--text)"></p>
+        </div>
+
+        <!-- Patch Notes -->
+        <div class="card card-full">
+          <h3>📰 Patch Notes Impact</h3>
+          <p id="res-patch" style="font-size:14px;line-height:1.7;color:var(--muted)"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── History View ───────────────────────────── -->
+    <div id="history-view" class="view hidden">
+      <div class="page-header">
+        <h2>📊 My Progress</h2>
+        <p>Track your improvement across all sessions.</p>
+      </div>
+
+      <div class="progress-stats">
+        <div class="stat-box"><div class="stat-val" id="hist-sessions">0</div><div class="stat-lbl">Sessions</div></div>
+        <div class="stat-box"><div class="stat-val" id="hist-avg">—</div><div class="stat-lbl">Avg Score</div></div>
+        <div class="stat-box"><div class="stat-val" id="hist-best">—</div><div class="stat-lbl">Best Score</div></div>
+        <div class="stat-box"><div class="stat-val" id="hist-trend">—</div><div class="stat-lbl">Improvement</div></div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Performance Over Time</h3>
+        <canvas id="progress-chart" height="80"></canvas>
+      </div>
+
+      <div id="session-list" class="session-list"></div>
+    </div>
+
+    <!-- ── Chat View ──────────────────────────────── -->
+    <div id="chat-view" class="view hidden">
+      <div class="chat-header">
+        <h2>💬 AI Coach</h2>
+        <div class="game-pills">
+          <button class="game-pill active" onclick="setChatGame('all', this)">All</button>
+          <button class="game-pill val" onclick="setChatGame('valorant', this)">Valorant</button>
+          <button class="game-pill fifa-p" onclick="setChatGame('fifa', this)">FIFA</button>
+          <button class="game-pill f1p" onclick="setChatGame('f1', this)">F1</button>
+        </div>
+      </div>
+
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg assistant">
+          <div class="msg-avatar">🤖</div>
+          <div class="msg-bubble">
+            Hey! I'm PAV1 AI — your personal gaming coach. Ask me anything about Valorant, FIFA, or F1. I'll search my knowledge base and give you expert advice! 🎮
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="chat-quick">
+          <button class="quick-btn" onclick="quickChat('Best agent for solo queue Valorant?')">🎯 Best solo agent?</button>
+          <button class="quick-btn" onclick="quickChat('Vandal vs Phantom — which should I use?')">🔫 Vandal vs Phantom?</button>
+          <button class="quick-btn" onclick="quickChat('Best meta formation in FIFA right now?')">⚽ Best FIFA formation?</button>
+          <button class="quick-btn" onclick="quickChat('Tyre strategy for Monaco F1?')">🏎️ Monaco strategy?</button>
+        </div>
+        <div class="chat-input-row">
+          <textarea id="chat-input" rows="1" placeholder="Ask about agents, builds, formations, setups..."
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+          <button class="btn-send" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─── Config ───────────────────────────────────────────────────────
+const API = 'http://localhost:8000';
+
+// ─── State ────────────────────────────────────────────────────────
+let username = localStorage.getItem('stan_username') || '';
+let selectedGame = 'valorant';
+let currentAnalysis = null;
+let chatGame = 'all';
+let chatHistory = [];
+let progressChart = null;
+let selectedImageFile = null;
+let historyCache = [];
+
+// ─── Auth ─────────────────────────────────────────────────────────
+function enterApp() {
+  const val = document.getElementById('username-input').value.trim();
+  if (!val) { alert('Please enter your gaming tag!'); return; }
+  username = val;
+  localStorage.setItem('stan_username', username);
+  showApp();
+}
+
+function showApp() {
+  document.getElementById('auth-view').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('sidebar-username').textContent = username;
+  document.getElementById('welcome-msg').textContent = `Welcome back, ${username}! 👋`;
+}
+
+function logout() {
+  localStorage.removeItem('stan_username');
+  username = '';
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('auth-view').classList.remove('hidden');
+  document.getElementById('username-input').value = '';
+}
+
+// ─── Navigation ───────────────────────────────────────────────────
+function goToView(viewId, navBtn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  document.getElementById(viewId).classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if (navBtn) navBtn.classList.add('active');
+}
+
+function selectGameAndAnalyze(game) {
+  selectedGame = game;
+  showUploadView(game);
+  goToView('upload-view', null);
+  document.getElementById('nav-games').classList.remove('active');
+}
+
+function selectGameAndChat(game) {
+  chatGame = game;
+  setChatGame(game, null);
+  goToView('chat-view', document.getElementById('nav-chat'));
+}
+
+function showUploadView(game) {
+  const names = { valorant: 'Valorant', fifa: 'FIFA', f1: 'F1' };
+  document.getElementById('upload-title').textContent = `Analyze Your ${names[game]} Gameplay`;
+  document.getElementById('stats-form-title').textContent = `${names[game]} Match Stats`;
+  ['valorant', 'fifa', 'f1'].forEach(g => {
+    document.getElementById(`form-${g}`).classList.toggle('hidden', g !== game);
+  });
+  // Reset image
+  selectedImageFile = null;
+  document.getElementById('image-preview').style.display = 'none';
+  document.getElementById('btn-analyze-img').style.display = 'none';
+  document.getElementById('drop-zone').querySelector('p').textContent = 'PNG, JPG — scoreboard, end screen, or results';
+}
+
+// ─── File Upload ──────────────────────────────────────────────────
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) setImageFile(file);
+});
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) setImageFile(file);
+}
+
+function setImageFile(file) {
+  selectedImageFile = file;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = document.getElementById('image-preview');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('btn-analyze-img').style.display = 'block';
+  dropZone.querySelector('p').textContent = `✅ ${file.name} selected`;
+}
+
+// ─── Analysis Steps Animation ─────────────────────────────────────
+function runSteps(callback) {
+  goToView('analyzing-view', null);
+  const steps = [1, 2, 3, 4, 5];
+  let i = 0;
+  steps.forEach(s => document.getElementById(`step-${s}`).className = 'step');
+  document.getElementById('step-1').classList.add('active');
+
+  const interval = setInterval(() => {
+    if (i < steps.length - 1) {
+      document.getElementById(`step-${steps[i]}`).className = 'step done';
+      document.getElementById(`step-${steps[i]}`).querySelector('.step-icon').textContent = '✅';
+      i++;
+      document.getElementById(`step-${steps[i]}`).classList.add('active');
+    }
+  }, 800);
+
+  callback().then(result => {
+    clearInterval(interval);
+    steps.forEach(s => {
+      document.getElementById(`step-${s}`).className = 'step done';
+      document.getElementById(`step-${s}`).querySelector('.step-icon').textContent = '✅';
+    });
+    setTimeout(() => showResults(result), 500);
+  }).catch(err => {
+    clearInterval(interval);
+    if (err.message !== '__handled__') {
+      showInlineError('Analysis failed: ' + (err.message || 'Unknown error'));
+      goToView('upload-view', null);
+    }
+  });
+}
+
+// ─── Validation ───────────────────────────────────────────────────
+function clearFieldError(el) {
+  el.classList.remove('invalid');
+  const err = el.parentNode.querySelector('.field-error');
+  if (err) err.remove();
+}
+
+function clearErrors() {
+  document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+  document.querySelectorAll('.field-error').forEach(el => el.remove());
+  const banner = document.getElementById('form-error-banner');
+  if (banner) banner.remove();
+}
+
+function markInvalid(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('invalid');
+  // Remove error on fix
+  el.addEventListener('input', () => {
+    el.classList.remove('invalid');
+    const err = el.parentNode.querySelector('.field-error');
+    if (err) err.remove();
+  }, { once: true });
+  const err = document.createElement('div');
+  err.className = 'field-error';
+  err.innerHTML = '⚠ ' + msg;
+  el.parentNode.appendChild(err);
+}
+
+function showErrorBanner(msg) {
+  let b = document.getElementById('form-error-banner');
+  if (!b) {
+    b = document.createElement('div');
+    b.id = 'form-error-banner';
+    b.className = 'form-error-banner';
+    document.querySelector('.stats-form').prepend(b);
+  }
+  b.innerHTML = '❌ ' + msg;
+}
+
+function validateStats() {
+  clearErrors();
+  let errors = 0;
+
+  function check(id, cond, msg) {
+    const val = document.getElementById(id)?.value;
+    const num = Number(val);
+    if (val === '' || val === null || val === undefined) {
+      markInvalid(id, 'This field is required'); errors++; return NaN;
+    }
+    if (isNaN(num)) {
+      markInvalid(id, 'Must be a number'); errors++; return NaN;
+    }
+    if (!cond(num)) {
+      markInvalid(id, msg); errors++;
+    }
+    return num;
+  }
+
+  if (selectedGame === 'valorant') {
+    const k  = check('v-kills',      n => n >= 0 && n <= 50,  'Kills must be 0 – 50');
+    const d  = check('v-deaths',     n => n >= 0 && n <= 50,  'Deaths must be 0 – 50');
+    const a  = check('v-assists',    n => n >= 0 && n <= 40,  'Assists must be 0 – 40');
+    const rw = check('v-rwon',       n => n >= 0 && n <= 25,  'Rounds Won must be 0 – 25');
+    const rl = check('v-rlost',      n => n >= 0 && n <= 25,  'Rounds Lost must be 0 – 25');
+    const fb = check('v-firstbloods',n => n >= 0 && n <= 20,  'First Bloods must be 0 – 20');
+    if (!isNaN(rw) && !isNaN(rl) && rw + rl < 1)
+      { markInvalid('v-rwon', 'Total rounds must be at least 1'); errors++; }
+    if (!isNaN(fb) && !isNaN(k) && fb > k)
+      { markInvalid('v-firstbloods', "Can't exceed your kill count"); errors++; }
+
+  } else if (selectedGame === 'fifa') {
+    const g  = check('f-goals',    n => n >= 0 && n <= 20, 'Goals must be 0 – 20');
+    const gc = check('f-conceded', n => n >= 0 && n <= 20, 'Goals Conceded must be 0 – 20');
+    const sh = check('f-shots',    n => n >= 0 && n <= 30, 'Shots on Target must be 0 – 30');
+    if (!isNaN(sh) && !isNaN(g) && sh < g)
+      { markInvalid('f-shots', "Can't be less than goals scored"); errors++; }
+
+  } else if (selectedGame === 'f1') {
+    const q  = check('r-qual',   n => n >= 1 && n <= 20, 'Qualifying position must be 1 – 20');
+    const fn = check('r-finish', n => n >= 1 && n <= 20, 'Finish position must be 1 – 20');
+    check('r-pits', n => n >= 0 && n <= 5, 'Pit stops must be 0 – 5');
+  }
+
+  if (errors > 0) {
+    showErrorBanner(`Fix ${errors} error${errors > 1 ? 's' : ''} above before analyzing.`);
+    return false;
+  }
+  return true;
+}
+
+// ─── Analyze (Stats Form) ─────────────────────────────────────────
+function getStats() {
+  if (selectedGame === 'valorant') {
+    return {
+      agent: document.getElementById('v-agent').value,
+      map: document.getElementById('v-map').value,
+      kills: +document.getElementById('v-kills').value,
+      deaths: +document.getElementById('v-deaths').value,
+      assists: +document.getElementById('v-assists').value,
+      first_bloods: +document.getElementById('v-firstbloods').value,
+      rounds_won: +document.getElementById('v-rwon').value,
+      rounds_lost: +document.getElementById('v-rlost').value,
+      headshot_pct: +document.getElementById('v-hs').value,
+      economy_score: +document.getElementById('v-eco').value
+    };
+  } else if (selectedGame === 'fifa') {
+    return {
+      formation: document.getElementById('f-formation').value,
+      match_result: document.getElementById('f-result').value,
+      goals: +document.getElementById('f-goals').value,
+      goals_conceded: +document.getElementById('f-conceded').value,
+      shots_on_target: +document.getElementById('f-shots').value,
+      game_mode: document.getElementById('f-mode').value,
+      pass_accuracy: +document.getElementById('f-pass').value,
+      possession_pct: +document.getElementById('f-poss').value
+    };
+  } else {
+    return {
+      team: document.getElementById('r-team').value,
+      circuit: document.getElementById('r-circuit').value,
+      qualifying_position: +document.getElementById('r-qual').value,
+      finish_position: +document.getElementById('r-finish').value,
+      pit_stops: +document.getElementById('r-pits').value,
+      tyre_strategy: document.getElementById('r-tyres').value,
+      clean_laps_pct: +document.getElementById('r-clean').value,
+      fastest_lap: document.getElementById('r-fastest').value === 'true'
+    };
+  }
+}
+
+function analyzeStats() {
+  if (!validateStats()) return;
+  runSteps(async () => {
+    const stats = getStats();
+    const res = await fetch(`${API}/api/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, game: selectedGame, stats })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Server error');
+    }
+    return res.json();
+  });
+}
+
+async function analyzeImage() {
+  if (!selectedImageFile) return;
+  runSteps(async () => {
+    const form = new FormData();
+    form.append('username', username);
+    form.append('game', selectedGame);
+    form.append('file', selectedImageFile);
+    const res = await fetch(`${API}/api/analyze/image`, { method: 'POST', body: form });
+    if (!res.ok) {
+      // Server error — fall back silently to stats form
+      goToView('upload-view', null);
+      showInlineError('Screenshot could not be read. Please fill in your stats manually below.');
+      throw new Error('__handled__');
+    }
+    return res.json();
+  });
+}
+
+function showInlineError(msg) {
+  let el = document.getElementById('inline-error');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'inline-error';
+    el.style.cssText = 'background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;border-radius:10px;padding:12px 16px;font-size:14px;margin-bottom:16px;';
+    document.querySelector('.upload-container').prepend(el);
+  }
+  el.textContent = '⚠️ ' + msg;
+  setTimeout(() => { if (el) el.remove(); }, 6000);
+}
+
+// ─── Show Results ─────────────────────────────────────────────────
+function showResults(data) {
+  currentAnalysis = data;
+  const a = data.analysis;
+  const score = data.score;
+  const grade = data.grade;
+
+  // Stats source notice
+  const notice = document.getElementById('res-notice');
+  if (data.stats_source === 'default') {
+    notice.classList.remove('hidden');
+  } else {
+    notice.classList.add('hidden');
+  }
+
+  // Badge
+  document.getElementById('res-game-badge').className = `game-badge ${data.game}`;
+  document.getElementById('res-game-badge').textContent = data.game.toUpperCase();
+  document.getElementById('res-title').textContent = `${data.game.charAt(0).toUpperCase() + data.game.slice(1)} Report`;
+
+  // Score gauge animation
+  document.getElementById('res-score').textContent = Math.round(score);
+  const gradeEl = document.getElementById('res-grade');
+  gradeEl.textContent = grade;
+  gradeEl.className = `grade-badge grade-${grade}`;
+  document.getElementById('res-date').textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  setTimeout(() => {
+    const color = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ef4444';
+    const ring = document.getElementById('gauge-ring');
+    ring.style.stroke = color;
+    ring.style.transition = 'stroke-dashoffset 1.5s ease';
+    ring.setAttribute('stroke-dashoffset', String(314 * (1 - score / 100)));
+  }, 100);
+
+  // Summary
+  document.getElementById('res-summary').textContent = a.summary || '';
+
+  // Strengths
+  const strEl = document.getElementById('res-strengths');
+  strEl.innerHTML = (a.strengths || []).map(s =>
+    `<div class="list-item"><span class="bullet">✅</span><span>${s}</span></div>`
+  ).join('');
+
+  // Weaknesses
+  const weakEl = document.getElementById('res-weaknesses');
+  weakEl.innerHTML = (a.weaknesses || []).map(w =>
+    `<div class="list-item"><span class="bullet">⚠️</span><span>${w}</span></div>`
+  ).join('');
+
+  // Improvements
+  const impEl = document.getElementById('res-improvements');
+  impEl.innerHTML = (a.improvements || []).map(tip =>
+    `<div class="list-item">
+      <span class="priority-badge priority-${tip.priority || 'medium'}">${(tip.priority || 'MED').toUpperCase()}</span>
+      <span>${tip.tip}</span>
+    </div>`
+  ).join('');
+
+  // Weapons
+  const wepEl = document.getElementById('res-weapons');
+  wepEl.innerHTML = (a.weapon_recommendations || []).map(w =>
+    `<div class="weapon-card">
+      <div class="weapon-name">🔫 ${w.name}</div>
+      <div class="weapon-reason">${w.reason}</div>
+    </div>`
+  ).join('');
+
+  // Teammates
+  const tm = a.teammate_suggestions || {};
+  const tmEl = document.getElementById('res-teammates');
+  tmEl.innerHTML = `
+    <div class="role-badge">Your Role: ${tm.your_role || 'Flex'}</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Needed</div>
+    <div class="role-pills">
+      ${(tm.needed_roles || []).map(r => `<span class="role-pill">${r}</span>`).join('')}
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Recommended</div>
+    <div class="role-pills">
+      ${(tm.recommended || []).map(r => `<span class="role-pill" style="border-color:var(--accent);color:var(--accent2)">${r}</span>`).join('')}
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:10px;line-height:1.5">${tm.synergy || ''}</p>
+  `;
+
+  // Strategy
+  document.getElementById('res-strategy').textContent = a.strategy || '';
+
+  // Patch notes
+  document.getElementById('res-patch').textContent = a.patch_notes_impact || '';
+
+  goToView('results-view', null);
+}
+
+// ─── History / Progress ───────────────────────────────────────────
+async function loadAndShowHistory() {
+  goToView('history-view', document.getElementById('nav-history'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-history').classList.add('active');
+
+  try {
+    const [histRes, progRes] = await Promise.all([
+      fetch(`${API}/api/history/${encodeURIComponent(username)}`),
+      fetch(`${API}/api/progress/${encodeURIComponent(username)}`)
+    ]);
+    const history = await histRes.json();
+    const progress = await progRes.json();
+    renderHistory(history, progress);
+  } catch (e) {
+    document.getElementById('session-list').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Could not load history</h3><p>Make sure the server is running.</p></div>';
+  }
+}
+
+function renderHistory(sessions, progress) {
+  historyCache = sessions || [];
+  // Stats
+  document.getElementById('hist-sessions').textContent = progress.total_sessions || 0;
+  document.getElementById('hist-avg').textContent = progress.avg_score ? `${progress.avg_score}` : '—';
+  document.getElementById('hist-best').textContent = progress.best_score ? `${progress.best_score}` : '—';
+  const imp = progress.improvement;
+  const trendEl = document.getElementById('hist-trend');
+  if (imp > 0) { trendEl.textContent = `+${imp}`; trendEl.style.color = 'var(--green)'; }
+  else if (imp < 0) { trendEl.textContent = `${imp}`; trendEl.style.color = 'var(--red)'; }
+  else { trendEl.textContent = '—'; }
+
+  // Chart
+  if (progress.sessions && progress.sessions.length > 0) {
+    renderChart(progress.sessions);
+  }
+
+  // Session list
+  const listEl = document.getElementById('session-list');
+  if (!sessions || sessions.length === 0) {
+    listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🎮</div><h3>No sessions yet</h3><p>Analyze your first game to start tracking progress!</p></div>';
+    return;
+  }
+
+  const gameColors = { valorant: 'var(--val)', fifa: 'var(--fifa)', f1: 'var(--f1)' };
+  listEl.innerHTML = sessions.map((s, i) => `
+    <div class="session-card" onclick="showSessionById(${i})">
+      <div class="session-score" style="color:${scoreColor(s.score)};border-color:${scoreColor(s.score)}20">
+        ${Math.round(s.score)}
+      </div>
+      <div class="session-info">
+        <div class="session-game" style="color:${gameColors[s.game] || 'var(--muted)'}">${s.game.toUpperCase()} · Grade ${s.grade}</div>
+        <div class="session-summary">${(s.summary || '').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      </div>
+      <div class="session-date">${new Date(s.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</div>
+    </div>
+  `).join('');
+}
+
+function scoreColor(score) {
+  if (score >= 80) return 'var(--green)';
+  if (score >= 60) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function showSessionById(index) {
+  const s = historyCache[index];
+  if (!s) return;
+  selectedGame = s.game;
+  showResults({ score: s.score, grade: s.grade, game: s.game, stats: s.stats, analysis: s.analysis });
+}
+
+function renderChart(sessions) {
+  const ctx = document.getElementById('progress-chart').getContext('2d');
+  if (progressChart) progressChart.destroy();
+
+  const gameColor = s => s.game === 'valorant' ? '#ff4655' : s.game === 'fifa' ? '#00c853' : '#ff5722';
+
+  progressChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: sessions.map(s => s.date),
+      datasets: [{
+        label: 'Performance Score',
+        data: sessions.map(s => s.score),
+        borderColor: '#7c3aed',
+        backgroundColor: 'rgba(124,58,237,0.1)',
+        pointBackgroundColor: sessions.map(s => gameColor(s)),
+        pointBorderColor: sessions.map(s => gameColor(s)),
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#161625',
+          borderColor: '#252538',
+          borderWidth: 1,
+          titleColor: '#e8e8f2',
+          bodyColor: '#6b6b90',
+          callbacks: {
+            title: items => `Session — ${sessions[items[0].dataIndex].game.toUpperCase()}`,
+            label: item => `Score: ${item.raw}/100`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: '#252538' }, ticks: { color: '#6b6b90' } },
+        y: { min: 0, max: 100, grid: { color: '#252538' }, ticks: { color: '#6b6b90', callback: v => `${v}` } }
+      }
+    }
+  });
+}
+
+// ─── Chat ─────────────────────────────────────────────────────────
+function setChatGame(game, btn) {
+  chatGame = game;
+  document.querySelectorAll('.game-pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    const pills = document.querySelectorAll('.game-pill');
+    const map = { all: 0, valorant: 1, fifa: 2, f1: 3 };
+    if (map[game] !== undefined) pills[map[game]].classList.add('active');
+  }
+}
+
+function quickChat(msg) {
+  document.getElementById('chat-input').value = msg;
+  sendChat();
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  appendMsg('user', text);
+  chatHistory.push({ role: 'user', content: text });
+
+  const typingId = appendTyping();
+  try {
+    const res = await fetch(`${API}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, history: chatHistory.slice(-10), game: chatGame })
+    });
+    const data = await res.json();
+    removeTyping(typingId);
+    const reply = data.response || 'Sorry, I could not generate a response.';
+    appendMsg('assistant', reply, data.tools_used || []);
+    chatHistory.push({ role: 'assistant', content: reply });
+  } catch {
+    removeTyping(typingId);
+    appendMsg('assistant', '❌ Could not reach PAV1 AI. Is the server running on port 8000?');
+  }
+}
+
+function appendMsg(role, text, tools = []) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  let toolBadges = '';
+  if (tools.length > 0) {
+    toolBadges = `<div style="margin-bottom:8px">${tools.map(t => `<span class="tool-badge">🔧 ${t.tool}</span>`).join('')}</div>`;
+  }
+
+  const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>').replace(/^###\s(.+)/gm, '<strong>$1</strong>');
+
+  div.innerHTML = role === 'assistant'
+    ? `<div class="msg-avatar">🤖</div><div class="msg-bubble">${toolBadges}${formatted}</div>`
+    : `<div class="msg-bubble">${formatted}</div><div class="msg-avatar">👤</div>`;
+
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function appendTyping() {
+  const msgs = document.getElementById('chat-messages');
+  const id = 'typing-' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'msg assistant';
+  div.id = id;
+  div.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return id;
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────
+window.onload = () => {
+  if (username) {
+    showApp();
+  } else {
+    document.getElementById('auth-view').classList.remove('hidden');
+  }
+  document.getElementById('username-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') enterApp();
+  });
+};
+</script>
+</body>
+</html>

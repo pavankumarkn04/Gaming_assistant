@@ -1,0 +1,29 @@
+# Virtual environment
+backend/venv/
+
+# Secrets
+backend/.env
+
+# Database
+backend/*.db
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ChromaDB data
+backend/chroma_db/
+
+# Sentence transformer cache
+backend/models/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
